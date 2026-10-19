@@ -1,0 +1,81 @@
+/* Used AI to help with indentation and testing */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    line-height: 1.6;
+    color: #243047;
+    background-color: #f5f7fb;
+}
+
+/* Header layout */
+.site-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 6%;
+    color: white;
+    background-color: #243b64;
+}
+
+.site-header h1 {
+    margin: 0;
+}
+
+/* Navigation layout */
+.nav-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.nav-links a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.nav-links a:hover,
+.nav-links a:focus-visible {
+    text-decoration: underline;
+}
+
+/* Hero layout */
+.hero {
+    padding: 64px 20px;
+    text-align: center;
+    background-color: #dfe9fb;
+}
+
+.hero h2 {
+    margin-top: 0;
+    margin-bottom: 12px;
+    font-size: 2.2rem;
+}
+
+.hero p {
+    max-width: 650px;
+    margin: 0 auto;
+}
+
+
+/* Footer */
+.site-footer {
+    padding: 20px;
+    color: white;
+    text-align: center;
+    background-color: #243b64;
+}
+
+.site-footer p {
+    margin: 0;
+}

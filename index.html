@@ -1,37 +1,81 @@
+
+<!--
+HTML document structure came from:
+https://stackoverflow.com/a/69069716
+
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Skill Swap</title>
-
-    <!-- Link to external stylesheet -->
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
-    <!-- Used AI to help with indentation and testing purposes -->
-    <header>
+    <!-- AI assistance used for indentation and testing -->
+
+    <header class="site-header">
         <h1>Skill Swap</h1>
+
+        <nav aria-label="Main navigation">
+            <ul class="nav-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#skills">Browse Skills</a></li>
+                <li><a href="#offer">Offer Skills</a></li>
+                <li><a href="#about">About</a></li>
+            </ul>
+        </nav>
     </header>
 
     <main>
-        <section class="hero">
-            <h2>Learn and Grow Together.</h2>
-            <p>Connect with other graduates and students to share skills, knowledge, and learn.</p>
+        <section class="hero" id="home">
+            <h2>Learn Together. Grow Together.</h2>
+            <p>
+                Connect with students to share skills, exchange knowledge,
+                and learn something new.
+            </p>
         </section>
 
-        <section id="skills">
+        <section class="skill-offerings" id="skills">
             <h2>Explore Skills</h2>
             <p>Skill offering will appear here.</p>
         </section>
+
+        <section class="info-section" id="offer">
+            <h2>Offer Your Skills</h2>
+            <p>
+                Do you have skills you'd like to share? Help another student learn something new.
+                More features are coming soon.
+            </p>
+        </section>
+
+        <section class="info-section" id="about">
+            <h2>About Skill Swap</h2>
+            <p>
+                Skill Swap helps college students and recent graduates
+                share knowledge, learn from one another, and build new skills.
+            </p>
+        </section>
     </main>
 
-    <footer>
-        <p>&copy;  Skillsswap-ciena. Built for students, by students.</p>
+    <footer class="site-footer">
+        <p>&copy; Skillsswap-ciena. Built for students, by students.</p>
     </footer>
 
-<!-- Link to external JavaScript file -->
-<script src="script.js"></script>
-
+    <script src="script.js"></script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
