@@ -28,17 +28,17 @@ describe('filterSkillsByCategory', () => {
 // test suite for calculateTotalCosts
     describe('calculateTotalCosts', () => {
     test('returns the correct values for different hours and rates', () => {
-        expect(calculateTotalCosts(20, 2)).toBe(40);
-        expect(calculateTotalCosts(15, 3)).toBe(45);
+        expect(calculateTotalCosts(20, 2)).toBe(40);// 20 * 2 = 40
+        expect(calculateTotalCosts(15, 3)).toBe(45);// 15 * 3 = 45
     });
 
     test('handles free sessions (0 price) and zero hours', () => {
-        expect(calculateTotalCosts(0, 3)).toBe(0);
-        expect(calculateTotalCosts(20, 0)).toBe(0);
+        expect(calculateTotalCosts(0, 3)).toBe(0);// 0 * 3 = 0
+        expect(calculateTotalCosts(20, 0)).toBe(0);// 20 * 0 = 0
     });
 
     test('returns correct value for decimal hours', () => {
-        expect(calculateTotalCosts(25, 1.5)).toBe(37.5);
+        expect(calculateTotalCosts(25, 1.5)).toBe(37.5);// 25 * 1.5 = 37.5
     });
 });
 
