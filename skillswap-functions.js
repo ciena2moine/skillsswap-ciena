@@ -15,5 +15,6 @@ function filterSkillsByCategory(skills, category) {
 
 module.exports = {
     filterSkills,
-    filterSkillsByCategory
+    filterSkillsByCategory,
 }; 
+

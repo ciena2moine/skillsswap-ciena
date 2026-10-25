@@ -1,4 +1,4 @@
-const {filterSkillsByCategory} = require('../skillswap-functions');
+const {filterSkillsByCategory, calculateTotalCosts} = require('../skillswap-functions');
 
 const skills = [
     { title: 'Backend Development', category: 'Computer Science', price: 30},
@@ -7,6 +7,7 @@ const skills = [
     { title: 'Software Development', category: 'Computer Science', price: 30}
 ];
 
+// test suite for filterSkillsByCategory
 describe('filterSkillsByCategory', () => {
     test('filters skills by category', () => {
         expect(filterSkillsByCategory(skills, 'Computer Science')).toEqual([
@@ -24,5 +25,20 @@ describe('filterSkillsByCategory', () => {
         expect(filterSkillsByCategory(skills, 'Cooking')).toEqual([]);
     });
 
+// test suite for calculateTotalCosts
+    describe('calculateTotalCosts', () => {
+    test('returns the correct values for different hours and rates', () => {
+        expect(calculateTotalCosts(20, 2)).toBe(40);
+        expect(calculateTotalCosts(15, 3)).toBe(45);
+    });
 
+    test('handles free sessions (0 price) and zero hours', () => {
+        expect(calculateTotalCosts(0, 3)).toBe(0);
+        expect(calculateTotalCosts(20, 0)).toBe(0);
+    });
+
+    test('returns correct value for decimal hours', () => {
+        expect(calculateTotalCosts(25, 1.5)).toBe(37.5);
+    });
+});
 
