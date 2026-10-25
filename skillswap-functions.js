@@ -17,9 +17,15 @@ function calculateTotalCosts(price, hours) {
     return price * hours;
 }
 
+function matchSkillsToUser(userNeeds, skills) {
+  return skills.filter(skill =>
+    skill.category === userNeeds.category && skill.price <= userNeeds.maxPrice
+  );
+}
+
 module.exports = {
     filterSkills,
     filterSkillsByCategory,
-    calculateTotalCosts
+    calculateTotalCosts,
+    matchSkillsToUser
 };
-
