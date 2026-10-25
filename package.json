@@ -1,0 +1,24 @@
+{
+  "name": "skillsswap-ciena--unit8",
+  "version": "1.0.0",
+  "description": "Skill Swap is a platform for students and graduates, where they will have the ability to share skills and knowledge. This creates the ability for them to learn in a more interesting way.",
+  "main": "script.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cienatumoine/skillsswap-ciena.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/cienatumoine/skillsswap-ciena/issues"
+  },
+  "homepage": "https://github.com/cienatumoine/skillsswap-ciena#readme",
+  "devDependencies": {
+    "jest": "^30.5.2"
+  }
+}
