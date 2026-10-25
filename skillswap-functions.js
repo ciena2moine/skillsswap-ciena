@@ -6,6 +6,14 @@ function filterSkills(skills, filter) {
     return skills.filter(skill => skill.category === filter);
 }
 
+function filterSkillsByCategory(skills, category) {
+    if (category === 'All') {
+        return skills;
+    }
+    return skills.filter(skill => skill.category === category);
+}
+
 module.exports = {
-    filterSkills
+    filterSkills,
+    filterSkillsByCategory
 }; 
