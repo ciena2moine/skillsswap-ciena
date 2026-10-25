@@ -1,4 +1,5 @@
-const {filterSkillsByCategory, calculateTotalCosts} = require('../skillswap-functions');
+const { use } = require('react');
+const {filterSkillsByCategory, calculateTotalCosts, matchSkillsToUser} = require('../skillswap-functions');
 
 const skills = [
     { title: 'Backend Development', category: 'Computer Science', price: 30},
@@ -6,6 +7,19 @@ const skills = [
     { title: 'Cover Letter Review', category: 'Internship', price: 20},
     { title: 'Software Development', category: 'Computer Science', price: 30}
 ];
+
+const user1Needs = { category: 'Computer Science', maxPrice: 35 };
+matchSkillsToUser(user1Needs, skills); // [{ title: 'Backend Development', category: 'Computer Science', price: 30 }]
+
+const user2Needs = { category: 'Math', maxPrice: 30 };
+matchSkillsToUser(user2Needs, skills); // [{ title: 'Pre-Calc', category: 'Math', price: 35 }]
+
+const user3Needs = { category:'Cooking', maxPrice: 100 };
+matchSkillsToUser(user3Needs, skills); // []
+
+const user4Needs = { category: 'Computer Science', maxPrice: 25 };
+matchSkillsToUser(user4Needs, skills); // [{ title: 'Backend Development', category: 'Computer Science', price: 30 }]
+
 
 // test suite for filterSkillsByCategory
 describe('filterSkillsByCategory', () => {
@@ -40,5 +54,35 @@ describe('filterSkillsByCategory', () => {
     test('returns correct value for decimal hours', () => {
         expect(calculateTotalCosts(25, 1.5)).toBe(37.5);// 25 * 1.5 = 37.5
     });
-});
 
+// test suite for matchSkillsToUser
+    describe('matchSkillsToUser', () => {
+        test('matches by category and price', () => {
+            const userSkills = ['Backend Development', 'Pre-Calc'];
+            const matched = matchSkillsToUser(skills, userSkills);
+            expect(matched).toEqual([
+                { title: 'Backend Development', category: 'Computer Science', price: 30 },
+                { title: 'Pre-Calc', category: 'Math', price: 35 }
+            ]);
+        });
+});
+        test('filters by max price', () => {
+            const userSkills = ['Backend Development', 'Pre-Calc'];
+            const matched = matchSkillsToUser(skills, userSkills, 30);
+            expect(matched).toEqual([
+                { title: 'Backend Development', category: 'Computer Science', price: 30 }
+            ]);
+
+        test('returns empty array when no matches', () => {
+            const userSkills = ['Cooking'];
+            const matched = matchSkillsToUser(skills, userSkills, 30);
+            expect(matched).toEqual([]);
+
+        test('includes free skills', () => {
+            const userSkills = ['Backend Development', 'Pre-Calc'];
+            const matched = matchSkillsToUser(skills, userSkills, 0);
+            expect(matched).toEqual([
+                { title: 'Backend Development', category: 'Computer Science', price: 30 },
+                { title: 'Pre-Calc', category: 'Math', price: 35 }
+            ]);
+        });
