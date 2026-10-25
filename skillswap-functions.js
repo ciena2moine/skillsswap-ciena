@@ -13,8 +13,13 @@ function filterSkillsByCategory(skills, category) {
     return skills.filter(skill => skill.category === category);
 }
 
+function calculateTotalCosts(price, hours) {
+    return price * hours;
+}
+
 module.exports = {
     filterSkills,
     filterSkillsByCategory,
-}; 
+    calculateTotalCosts
+};
 
