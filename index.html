@@ -185,20 +185,29 @@ https://stackoverflow.com/a/69069716
             </div>
         </section>
 
-            <section class="find-my-match">
-            <h2>Find My Match</h2>
-            <p>Find a skill to learn from another student.</p>
+        <section id="find-match">
+          <h2>Find My Match</h2>
 
-            <div class="filter-buttons">
-                <button class="filter-btn active" data-category="All">All</button>
-                <button class="filter-btn" data-category="Backend Development">Computer Science</button>
-                <button class="filter-btn" data-category="Pre-Calc">Math</button>
-                <button class="filter-btn" data-category="Software Development">Computer Science</button>
-                <button class="filter-btn" data-category="Cover Letter Review">Internship</button>
-            </div>
+           <label for="match-category">Preferred Category:</label>
+        <select id="match-category">
+           <option value="Computer Science">Computer Science</option>
+           <option value="Math">Math</option>
+           <option value="Internship">Internship</option>
+           <option value="Career">Career</option>
+  </select>
 
-            <div id="skills-container" class="skills-container"></div>
-        </section>
+       <label for="match-max-price">Maximum Price ($):</label>
+       <input
+           type="number"
+           id="match-max-price"
+           min="0"
+           value="35"
+       />
+
+  <button id="find-match-button">Find My Match</button>
+
+  <div id="match-results"></div>
+</section>
 
     </main>
 
@@ -210,16 +219,6 @@ https://stackoverflow.com/a/69069716
     <script src="script.js"></script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
 
 
 
