@@ -1,9 +1,8 @@
-
 <!--
 HTML document structure came from:
 https://stackoverflow.com/a/69069716
-
 -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -42,91 +41,67 @@ https://stackoverflow.com/a/69069716
         <section class="skill-offerings" id="skills">
             <h2>Explore Skills</h2>
             <p class="section-intro">
-                Skill offering will appear here.
+                Skill offerings from the Skill Swap database will appear here.
             </p>
 
-            <div class="skill-grid">
-
-                <article class="skill-card">
-                    <h3>Backend Development</h3>
-                    <p>Learn about server-side programming, databases, and APIs.</p>
-                    <p class="skill-price">Price: $30 per session</p>
-                    <p class="skill-provider">Provider: Alexandria</p>
-
-                    <button
-                        class="details-button"
-                        type="button"
-                        aria-expanded="false"
-                        data-details="Learn about server-side programming, databases, and APIs."
-                    >
-                        View Details
-                    </button>
-
-                    <p class="skill-details" hidden></p>
-                </article>
-
-                <article class="skill-card">
-                    <h3>Pre-Calc</h3>
-                    <p>Prepare for calculus with a focus on functions, limits, and derivatives.</p>
-                    <p class="skill-price">Price: $35 per session</p>
-                    <p class="skill-provider">Provider: Maxwell</p>
-
-                    <button
-                        class="details-button"
-                        type="button"
-                        aria-expanded="false"
-                        data-details="Prepare for calculus with a focus on functions, limits, and derivatives."
-                    >
-                        View Details
-                    </button>
-
-                    <p class="skill-details" hidden></p>
-                </article>
-
-                <article class="skill-card">
-                    <h3>Cover Letter Review</h3>
-                    <p>Get feedback on your cover letter and improve your chances of landing an interview.</p>
-                    <p class="skill-price">Price: $20 per session</p>
-                    <p class="skill-provider">Provider: Christopher</p>
-
-                    <button
-                        class="details-button"
-                        type="button"
-                        aria-expanded="false"
-                        data-details="Get feedback on your cover letter and improve your chances of landing an interview."
-                    >
-                        View Details
-                    </button>
-
-                    <p class="skill-details" hidden></p>
-                </article>
-
-                <article class="skill-card">
-                    <h3>Software Development</h3>
-                    <p>Build and maintain software applications.</p>
-                    <p class="skill-price">Price: $30 per session</p>
-                    <p class="skill-provider">Provider: Trystan</p>
-
-                    <button
-                        class="details-button"
-                        type="button"
-                        aria-expanded="false"
-                        data-details="Explore the software development lifecycle, from requirements gathering to deployment."
-                    >
-                        View Details
-                    </button>
-
-                    <p class="skill-details" hidden></p>
-                </article>
-
+            <!-- Skills will load from the backend API -->
+            <div id="skills-container" class="skill-grid">
+                <p>Loading skills...</p>
             </div>
         </section>
 
         <section class="info-section" id="offer">
             <h2>Offer Your Skills</h2>
             <p>
-                Do you have skills you'd like to share? Help another student learn something new. More features coming soon.
+                Do you have skills you'd like to share?
+                Help another student learn something new.
             </p>
+
+            <!-- New Skill Creation Form -->
+            <form id="skill-form" class="calculator-form">
+
+                <label for="title">Skill Title</label>
+                <input
+                    type="text"
+                    id="title"
+                    name="title"
+                    placeholder="Enter skill title"
+                    required
+                />
+
+                <label for="category">Category</label>
+                <input
+                    type="text"
+                    id="category"
+                    name="category"
+                    placeholder="Example: Computer Science"
+                    required
+                />
+
+                <label for="price">Price per Session ($)</label>
+                <input
+                    type="number"
+                    id="price"
+                    name="price"
+                    min="0"
+                    step="0.01"
+                    placeholder="Enter price"
+                    required
+                />
+
+                <label for="description">Description</label>
+                <textarea
+                    id="description"
+                    name="description"
+                    placeholder="Describe the skill you are offering"
+                    required
+                ></textarea>
+
+                <button type="submit">
+                    Add Skill
+                </button>
+
+            </form>
         </section>
 
         <section class="info-section" id="about">
@@ -142,14 +117,25 @@ https://stackoverflow.com/a/69069716
             <p>Find a skill to learn from another student.</p>
 
             <div class="filter-buttons">
-                <button class="filter-btn active" data-category="All">All</button>
-                <button class="filter-btn" data-category="Backend Development">Computer Science</button>
-                <button class="filter-btn" data-category="Pre-Calc">Math</button>
-                <button class="filter-btn" data-category="Software Development">Computer Science</button>
-                <button class="filter-btn" data-category="Cover Letter Review">Internship</button>
+                <button class="filter-btn active" data-category="All">
+                    All
+                </button>
+                <button class="filter-btn" data-category="Computer Science">
+                    Computer Science
+                </button>
+                <button class="filter-btn" data-category="Math">
+                    Math
+                </button>
+                <button class="filter-btn" data-category="Internship">
+                    Internship
+                </button>
+                <button class="filter-btn" data-category="Career">
+                    Career
+                </button>
             </div>
 
-            <div id="skills-container" class="skills-container"></div>
+            <!-- Filtered database skills will appear here -->
+            <div id="filtered-skills-container" class="skills-container"></div>
         </section>
 
         <section class="calculator-section">
@@ -186,39 +172,43 @@ https://stackoverflow.com/a/69069716
         </section>
 
         <section id="find-match">
-          <h2>Find My Match</h2>
+            <h2>Find My Match</h2>
 
-           <label for="match-category">Preferred Category:</label>
-        <select id="match-category">
-           <option value="Computer Science">Computer Science</option>
-           <option value="Math">Math</option>
-           <option value="Internship">Internship</option>
-           <option value="Career">Career</option>
-  </select>
+            <label for="match-category">Preferred Category:</label>
 
-       <label for="match-max-price">Maximum Price ($):</label>
-       <input
-           type="number"
-           id="match-max-price"
-           min="0"
-           value="35"
-       />
+            <select id="match-category">
+                <option value="Computer Science">Computer Science</option>
+                <option value="Math">Math</option>
+                <option value="Internship">Internship</option>
+                <option value="Career">Career</option>
+            </select>
 
-  <button id="find-match-button">Find My Match</button>
+            <label for="match-max-price">Maximum Price ($):</label>
 
-  <div id="match-results"></div>
-</section>
+            <input
+                type="number"
+                id="match-max-price"
+                min="0"
+                value="35"
+            />
+
+            <button type="button" id="find-match-button">
+                Find My Match
+            </button>
+
+            <div id="match-results"></div>
+        </section>
 
     </main>
 
     <footer class="site-footer">
-        <p>&copy; Skillswap-ciena Built for students, by students.</p>
+        <p>&copy; 2026 Skill Swap. Built for students, by students.</p>
     </footer>
 
+    <!-- JavaScript Files -->
+    <script src="api-service.js"></script>
     <script src="skillswap-functions.js"></script>
     <script src="script.js"></script>
+
 </body>
 </html>
-
-
-
