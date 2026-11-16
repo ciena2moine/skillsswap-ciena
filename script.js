@@ -1,20 +1,18 @@
 
 // Used AI to help with coding and testing.
-// Skill Swap frontend - connects to the Express backend API.
 
 console.log("Welcome to Skill Swap!");
 
-// Backend API address for local development.
-const API_BASE_URL = "http://localhost:3000/api/skills";
+// Your deployed Render backend API
+const API_BASE_URL =
+  "https://skillswap-backend-sskw.onrender.com/api/skills";
 
-// Store skills retrieved from the database.
+// Store skills retrieved from the backend
 let skills = [];
 let selectedCategory = "All";
 
-// HTML elements.
+// HTML elements
 const skillsContainer = document.getElementById("skills-container");
-const filterButtons = document.querySelectorAll(".filter-btn");
-
 const skillForm = document.getElementById("skill-form");
 const formMessage = document.getElementById("form-message");
 
@@ -23,234 +21,233 @@ const hoursInput = document.getElementById("hours");
 const calculateButton = document.getElementById("calculate-button");
 const costResult = document.getElementById("cost-result");
 
+const matchCategory = document.getElementById("match-category");
+const matchMaxPrice = document.getElementById("match-max-price");
 const findMatchButton = document.getElementById("find-match-button");
-const categoryInput = document.getElementById("match-category");
-const maxPriceInput = document.getElementById("match-max-price");
 const matchResults = document.getElementById("match-results");
 
-// Escape user-provided text before displaying it as HTML.
+// Prevent HTML from being interpreted as markup
 function escapeHTML(value) {
-    return String(value ?? "").replace(/[&<>"']/g, character => ({
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '"': "&quot;",
-        "'": "&#39;"
-    })[character]);
+  return String(value ?? "").replace(/[&<>"']/g, (character) => {
+    const replacements = {
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#039;"
+    };
+
+    return replacements[character];
+  });
 }
 
-// GET: Retrieve skills from the backend database.
+// Retrieve skills from the backend API
 async function fetchSkills() {
-    try {
-        skillsContainer.innerHTML = "<p>Loading skills...</p>";
+  try {
+    skillsContainer.innerHTML = "<p>Loading skills...</p>";
 
-        const response = await fetch(API_BASE_URL);
+    const response = await fetch(API_BASE_URL);
 
-        if (!response.ok) {
-            throw new Error("Unable to retrieve skills.");
-        }
-
-        skills = await response.json();
-
-        if (!Array.isArray(skills)) {
-            throw new Error("The API returned an unexpected response.");
-        }
-
-        displaySkills();
-
-        console.log("Skills loaded successfully:", skills);
-
-    } catch (error) {
-        console.error("Error loading skills:", error);
-
-        skillsContainer.innerHTML =
-            "<p>Unable to load skills. Please check that the backend is running.</p>";
+    if (!response.ok) {
+      throw new Error("Could not retrieve skills from the server.");
     }
+
+    const data = await response.json();
+
+    // Support either an array or an object containing a skills array
+    skills = Array.isArray(data) ? data : data.skills || [];
+
+    displaySkills();
+  } catch (error) {
+    console.error("Error loading skills:", error);
+    skillsContainer.innerHTML =
+      "<p>Unable to load skills. Please try again later.</p>";
+  }
 }
 
-// Display skills retrieved from the database.
+// Display skills on the page
 function displaySkills() {
-    const filteredSkills = selectedCategory === "All"
-        ? skills
-        : skills.filter(skill => skill.category === selectedCategory);
+  if (!skillsContainer) return;
 
-    if (filteredSkills.length === 0) {
-        skillsContainer.innerHTML = "<p>No skills found in this category.</p>";
-        return;
-    }
+  const filteredSkills =
+    selectedCategory === "All"
+      ? skills
+      : filterSkillsByCategory(skills, selectedCategory);
 
-    skillsContainer.innerHTML = filteredSkills.map(skill => `
-        <article class="skill-card">
-            <h3>${escapeHTML(skill.title)}</h3>
-            <p>Category: ${escapeHTML(skill.category)}</p>
-            <p>Price: $${Number(skill.price).toFixed(2)}</p>
-            <p>Provider: ${escapeHTML(skill.provider || "Anonymous")}</p>
+  if (!filteredSkills.length) {
+    skillsContainer.innerHTML = "<p>No skills found in this category.</p>";
+    return;
+  }
 
-            <button
-                class="details-button"
-                type="button"
-                aria-expanded="false"
-            >
-                View Details
-            </button>
+  skillsContainer.innerHTML = filteredSkills
+    .map((skill) => {
+      const title = escapeHTML(skill.title);
+      const description = escapeHTML(skill.description);
+      const category = escapeHTML(skill.category);
+      const provider = escapeHTML(skill.provider || "Anonymous");
+      const price = Number(skill.price || 0);
 
-            <p class="skill-details" hidden>
-                ${escapeHTML(skill.description || "")}
-            </p>
-        </article>
-    `).join("");
+      return `
+        <div class="skill-card">
+          <h3>${title}</h3>
+          <p>${description}</p>
+          <p><strong>Category:</strong> ${category}</p>
+          <p><strong>Price:</strong> $${price.toFixed(2)}/hour</p>
+          <p><strong>Provider:</strong> ${provider}</p>
+          <button
+            class="details-button"
+            type="button"
+            data-skill-title="${title}"
+          >
+            View Details
+          </button>
+        </div>
+      `;
+    })
+    .join("");
 }
 
-// Category filtering.
-filterButtons.forEach(button => {
-    button.addEventListener("click", () => {
-        selectedCategory = button.dataset.category;
+// Filter buttons
+const filterButtons = document.querySelectorAll(".filter-btn");
 
-        filterButtons.forEach(filterButton => {
-            filterButton.classList.remove("active");
-        });
-
-        button.classList.add("active");
-        displaySkills();
-    });
+filterButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    selectedCategory = button.dataset.category || "All";
+    displaySkills();
+  });
 });
 
-// Show and hide skill details.
-skillsContainer.addEventListener("click", event => {
+// View skill details
+if (skillsContainer) {
+  skillsContainer.addEventListener("click", (event) => {
     const button = event.target.closest(".details-button");
 
-    if (!button) {
-        return;
+    if (!button) return;
+
+    const selectedSkill = skills.find(
+      (skill) => skill.title === button.dataset.skillTitle
+    );
+
+    if (selectedSkill) {
+      alert(
+        `Skill: ${selectedSkill.title}\n` +
+        `Description: ${selectedSkill.description}\n` +
+        `Category: ${selectedSkill.category}\n` +
+        `Price: $${Number(selectedSkill.price || 0).toFixed(2)}/hour\n` +
+        `Provider: ${selectedSkill.provider || "Anonymous"}`
+      );
     }
+  });
+}
 
-    const card = button.closest(".skill-card");
-    const details = card.querySelector(".skill-details");
-    const isHidden = details.hidden;
-
-    details.hidden = !isHidden;
-
-    button.textContent = isHidden ? "Hide Details" : "View Details";
-    button.setAttribute("aria-expanded", String(isHidden));
-});
-
-// POST: Add a new skill to the backend database.
-skillForm.addEventListener("submit", async event => {
+// Add a new skill through the backend API
+if (skillForm) {
+  skillForm.addEventListener("submit", async (event) => {
     event.preventDefault();
 
     const newSkill = {
-        title: document.getElementById("skill-title").value.trim(),
-        description: document.getElementById("skill-description").value.trim(),
-        category: document.getElementById("skill-category").value,
-        price: Number(document.getElementById("skill-price").value),
-        provider: document.getElementById("skill-provider").value.trim()
+      title: document.getElementById("skill-title").value.trim(),
+      description: document.getElementById("skill-description").value.trim(),
+      category: document.getElementById("skill-category").value,
+      price: Number(document.getElementById("skill-price").value),
+      provider:
+        document.getElementById("skill-provider").value.trim() || "Anonymous"
     };
 
-    if (
-        !newSkill.title ||
-        !newSkill.description ||
-        !newSkill.category ||
-        !newSkill.provider ||
-        document.getElementById("skill-price").value.trim() === "" ||
-        !Number.isFinite(newSkill.price) ||
-        newSkill.price < 0
-    ) {
-        formMessage.textContent =
-            "Please complete all fields with valid information.";
-        return;
-    }
-
     try {
-        formMessage.textContent = "Saving your skill...";
+      const response = await fetch(API_BASE_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(newSkill)
+      });
 
-        const response = await fetch(API_BASE_URL, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(newSkill)
-        });
+      if (!response.ok) {
+        throw new Error("Unable to add your skill.");
+      }
 
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.error || "Failed to save skill.");
-        }
+      if (formMessage) {
+        formMessage.textContent = "Skill added successfully!";
+      }
 
-        await response.json();
+      skillForm.reset();
 
-        formMessage.textContent = "Your skill was successfully added!";
-        skillForm.reset();
-
-        // Reload skills from the database.
-        await fetchSkills();
-
+      // Reload skills from the backend
+      await fetchSkills();
     } catch (error) {
-        console.error("Error adding skill:", error);
+      console.error("Error adding skill:", error);
 
+      if (formMessage) {
         formMessage.textContent =
-            "Unable to save your skill. Please check your backend connection.";
+          "There was a problem adding your skill. Please try again.";
+      }
     }
-});
-
-// Cost calculator.
-if (calculateButton && rateInput && hoursInput && costResult) {
-    calculateButton.addEventListener("click", () => {
-        const hourlyRate = Number(rateInput.value);
-        const hours = Number(hoursInput.value);
-
-        if (
-            rateInput.value.trim() === "" ||
-            hoursInput.value.trim() === "" ||
-            !Number.isFinite(hourlyRate) ||
-            !Number.isFinite(hours) ||
-            hourlyRate < 0 ||
-            hours < 0
-        ) {
-            costResult.textContent =
-                "Please enter a valid, non-negative rate and number of hours.";
-            return;
-        }
-
-        const total = calculateTotalCosts(hourlyRate, hours);
-
-        costResult.textContent = `Total cost: $${total.toFixed(2)}`;
-    });
+  });
 }
 
-// Find My Match.
-if (findMatchButton && categoryInput && maxPriceInput && matchResults) {
-    findMatchButton.addEventListener("click", () => {
-        const category = categoryInput.value;
-        const maxPrice = Number(maxPriceInput.value);
+// Calculate total costs
+if (calculateButton) {
+  calculateButton.addEventListener("click", () => {
+    const hourlyRate = Number(rateInput.value);
+    const hours = Number(hoursInput.value);
 
-        if (
-            maxPriceInput.value.trim() === "" ||
-            !Number.isFinite(maxPrice) ||
-            maxPrice < 0
-        ) {
-            matchResults.textContent =
-                "Please enter a valid, non-negative maximum price.";
-            return;
-        }
+    if (
+      rateInput.value === "" ||
+      hoursInput.value === "" ||
+      hourlyRate < 0 ||
+      hours < 0
+    ) {
+      costResult.textContent = "Please enter valid numbers.";
+      return;
+    }
 
-        const userNeeds = { category, maxPrice };
-        const matches = matchSkillsToUser(userNeeds, skills);
+    const totalCost = calculateTotalCosts(hourlyRate, hours);
 
-        if (matches.length === 0) {
-            matchResults.textContent = "No matching skills found.";
-            return;
-        }
-
-        matchResults.innerHTML = matches.map(skill => `
-            <article class="skill-card">
-                <h3>${escapeHTML(skill.title)}</h3>
-                <p>Category: ${escapeHTML(skill.category)}</p>
-                <p>Price: $${Number(skill.price).toFixed(2)}</p>
-                <p>Provider: ${escapeHTML(skill.provider || "Anonymous")}</p>
-                <p>${escapeHTML(skill.description || "")}</p>
-            </article>
-        `).join("");
-    });
+    costResult.textContent = `Total Cost: $${totalCost.toFixed(2)}`;
+  });
 }
 
-// Load skills when the page opens.
+// Find skills matching the user's needs
+if (findMatchButton) {
+  findMatchButton.addEventListener("click", () => {
+    const category = matchCategory.value;
+    const maxPrice =
+      matchMaxPrice.value === ""
+        ? Infinity
+        : Number(matchMaxPrice.value);
+
+    if (maxPrice < 0) {
+      matchResults.textContent = "Please enter a valid maximum price.";
+      return;
+    }
+
+    const userNeeds = {
+      category: category,
+      maxPrice: maxPrice
+    };
+
+    const matchedSkills = matchSkillsToUser(userNeeds, skills);
+
+    if (!matchedSkills.length) {
+      matchResults.innerHTML = "<p>No matching skills found.</p>";
+      return;
+    }
+
+    matchResults.innerHTML = matchedSkills
+      .map(
+        (skill) => `
+          <div class="skill-card">
+            <h3>${escapeHTML(skill.title)}</h3>
+            <p>${escapeHTML(skill.description)}</p>
+            <p><strong>Category:</strong> ${escapeHTML(skill.category)}</p>
+            <p><strong>Price:</strong> $${Number(skill.price || 0).toFixed(2)}/hour</p>
+          </div>
+        `
+      )
+      .join("");
+  });
+}
+
+// Load skills when the page opens
 fetchSkills();
