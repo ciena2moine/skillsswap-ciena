@@ -1,31 +1,53 @@
-/* in this file: filter, calculate, match */
-function filterSkills(skills, filter) {
-    if (filter === 'All') {
-        return skills;
-    }
-    return skills.filter(skill => skill.category === filter);
-}
+// Used AI to help with coding and testing.
+// Shared functions for the Skill Swap application.
 
+// Filter skills by category.
 function filterSkillsByCategory(skills, category) {
-    if (category === 'All') {
+    if (!Array.isArray(skills)) {
+        return [];
+    }
+
+    if (category === "All") {
         return skills;
     }
+
     return skills.filter(skill => skill.category === category);
 }
 
-function calculateTotalCosts(price, hours) {
-    return price * hours;
+// Calculate the total cost of a skill.
+function calculateTotalCosts(hourlyRate, hours) {
+    const rate = Number(hourlyRate);
+    const totalHours = Number(hours);
+
+    if (
+        !Number.isFinite(rate) ||
+        !Number.isFinite(totalHours) ||
+        rate < 0 ||
+        totalHours < 0
+    ) {
+        return 0;
+    }
+
+    return rate * totalHours;
 }
 
+// Find skills that match a user's category and maximum price.
 function matchSkillsToUser(userNeeds, skills) {
-  return skills.filter(skill =>
-    skill.category === userNeeds.category && skill.price <= userNeeds.maxPrice
-  );
-}
+    if (!Array.isArray(skills) || !userNeeds) {
+        return [];
+    }
 
-module.exports = {
-    filterSkills,
-    filterSkillsByCategory,
-    calculateTotalCosts,
-    matchSkillsToUser
-};
+    const category = userNeeds.category;
+    const maxPrice = Number(userNeeds.maxPrice);
+
+    if (!Number.isFinite(maxPrice) || maxPrice < 0) {
+        return [];
+    }
+
+    return skills.filter(skill => {
+        return (
+            skill.category === category &&
+            Number(skill.price) <= maxPrice
+        );
+    });
+}
