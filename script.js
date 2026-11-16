@@ -1,14 +1,22 @@
+
 // Used AI to help with coding and testing.
 // Skill Swap frontend - connects to the Express backend API.
 
-// LOCAL DEVELOPMENT API ADDRESS
-const API_BASE_URL = "http://localhost:3000/api/skills";
-
 console.log("Welcome to Skill Swap!");
 
-// HTML elements
+// Backend API address for local development.
+const API_BASE_URL = "http://localhost:3000/api/skills";
+
+// Store skills retrieved from the database.
+let skills = [];
+let selectedCategory = "All";
+
+// HTML elements.
 const skillsContainer = document.getElementById("skills-container");
 const filterButtons = document.querySelectorAll(".filter-btn");
+
+const skillForm = document.getElementById("skill-form");
+const formMessage = document.getElementById("form-message");
 
 const rateInput = document.getElementById("hourly-rate");
 const hoursInput = document.getElementById("hours");
@@ -19,14 +27,6 @@ const findMatchButton = document.getElementById("find-match-button");
 const categoryInput = document.getElementById("match-category");
 const maxPriceInput = document.getElementById("match-max-price");
 const matchResults = document.getElementById("match-results");
-
-// Add Skill form elements
-const skillForm = document.getElementById("skill-form");
-const formMessage = document.getElementById("form-message");
-
-// Skills are now loaded from the backend instead of a hardcoded array.
-let skills = [];
-let selectedCategory = "All";
 
 // Escape user-provided text before displaying it as HTML.
 function escapeHTML(value) {
@@ -39,7 +39,7 @@ function escapeHTML(value) {
     })[character]);
 }
 
-// GET: Retrieve skills from the backend.
+// GET: Retrieve skills from the backend database.
 async function fetchSkills() {
     try {
         skillsContainer.innerHTML = "<p>Loading skills...</p>";
@@ -58,8 +58,11 @@ async function fetchSkills() {
 
         displaySkills();
 
+        console.log("Skills loaded successfully:", skills);
+
     } catch (error) {
         console.error("Error loading skills:", error);
+
         skillsContainer.innerHTML =
             "<p>Unable to load skills. Please check that the backend is running.</p>";
     }
@@ -79,25 +82,20 @@ function displaySkills() {
     skillsContainer.innerHTML = filteredSkills.map(skill => `
         <article class="skill-card">
             <h3>${escapeHTML(skill.title)}</h3>
-            <p>${escapeHTML(skill.description)}</p>
-            <p class="skill-price">
-                Price: $${Number(skill.price).toFixed(2)}
-            </p>
-            <p class="skill-provider">
-                Provider: ${escapeHTML(skill.provider || "Anonymous")}
-            </p>
+            <p>Category: ${escapeHTML(skill.category)}</p>
+            <p>Price: $${Number(skill.price).toFixed(2)}</p>
+            <p>Provider: ${escapeHTML(skill.provider || "Anonymous")}</p>
 
             <button
                 class="details-button"
                 type="button"
-                data-action="details"
                 aria-expanded="false"
             >
                 View Details
             </button>
 
             <p class="skill-details" hidden>
-                ${escapeHTML(skill.description)}
+                ${escapeHTML(skill.description || "")}
             </p>
         </article>
     `).join("");
@@ -121,74 +119,77 @@ filterButtons.forEach(button => {
 skillsContainer.addEventListener("click", event => {
     const button = event.target.closest(".details-button");
 
-    if (!button) return;
+    if (!button) {
+        return;
+    }
 
     const card = button.closest(".skill-card");
     const details = card.querySelector(".skill-details");
     const isHidden = details.hidden;
 
     details.hidden = !isHidden;
+
     button.textContent = isHidden ? "Hide Details" : "View Details";
     button.setAttribute("aria-expanded", String(isHidden));
 });
 
 // POST: Add a new skill to the backend database.
-if (skillForm) {
-    skillForm.addEventListener("submit", async event => {
-        event.preventDefault();
+skillForm.addEventListener("submit", async event => {
+    event.preventDefault();
 
-        const newSkill = {
-            title: document.getElementById("skill-title").value.trim(),
-            description: document.getElementById("skill-description").value.trim(),
-            category: document.getElementById("skill-category").value,
-            price: Number(document.getElementById("skill-price").value),
-            provider: document.getElementById("skill-provider").value.trim()
-        };
+    const newSkill = {
+        title: document.getElementById("skill-title").value.trim(),
+        description: document.getElementById("skill-description").value.trim(),
+        category: document.getElementById("skill-category").value,
+        price: Number(document.getElementById("skill-price").value),
+        provider: document.getElementById("skill-provider").value.trim()
+    };
 
-        if (
-            !newSkill.title ||
-            !newSkill.description ||
-            !newSkill.category ||
-            !newSkill.provider ||
-            document.getElementById("skill-price").value.trim() === "" ||
-            !Number.isFinite(newSkill.price) ||
-            newSkill.price < 0
-        ) {
-            formMessage.textContent = "Please complete all fields with valid information.";
-            return;
+    if (
+        !newSkill.title ||
+        !newSkill.description ||
+        !newSkill.category ||
+        !newSkill.provider ||
+        document.getElementById("skill-price").value.trim() === "" ||
+        !Number.isFinite(newSkill.price) ||
+        newSkill.price < 0
+    ) {
+        formMessage.textContent =
+            "Please complete all fields with valid information.";
+        return;
+    }
+
+    try {
+        formMessage.textContent = "Saving your skill...";
+
+        const response = await fetch(API_BASE_URL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(newSkill)
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || "Failed to save skill.");
         }
 
-        try {
-            formMessage.textContent = "Saving your skill...";
+        await response.json();
 
-            const response = await fetch(API_BASE_URL, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(newSkill)
-            });
+        formMessage.textContent = "Your skill was successfully added!";
+        skillForm.reset();
 
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.error || "Failed to save skill.");
-            }
+        // Reload skills from the database.
+        await fetchSkills();
 
-            await response.json();
+    } catch (error) {
+        console.error("Error adding skill:", error);
 
-            formMessage.textContent = "Your skill was successfully added!";
-            skillForm.reset();
-
-            // Reload skills from the database.
-            await fetchSkills();
-
-        } catch (error) {
-            console.error("Error adding skill:", error);
-            formMessage.textContent =
-                "Unable to save your skill. Please check your backend connection.";
-        }
-    });
-}
+        formMessage.textContent =
+            "Unable to save your skill. Please check your backend connection.";
+    }
+});
 
 // Cost calculator.
 if (calculateButton && rateInput && hoursInput && costResult) {
@@ -245,6 +246,7 @@ if (findMatchButton && categoryInput && maxPriceInput && matchResults) {
                 <p>Category: ${escapeHTML(skill.category)}</p>
                 <p>Price: $${Number(skill.price).toFixed(2)}</p>
                 <p>Provider: ${escapeHTML(skill.provider || "Anonymous")}</p>
+                <p>${escapeHTML(skill.description || "")}</p>
             </article>
         `).join("");
     });
