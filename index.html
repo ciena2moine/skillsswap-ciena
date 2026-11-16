@@ -1,181 +1,131 @@
-<!--
-HTML document structure came from:
-https://stackoverflow.com/a/69069716
--->
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Skill Swap</title>
     <link rel="stylesheet" href="styles.css">
 </head>
-
 <body>
-    <!-- AI assistance used for coding and testing. -->
 
-    <header class="site-header">
+    <header>
         <h1>Skill Swap</h1>
-
-        <nav aria-label="Main navigation">
-            <ul class="nav-links">
-                <li><a href="#home">Home</a></li>
-                <li><a href="#skills">Browse Skills</a></li>
-                <li><a href="#offer">Offer Skills</a></li>
-                <li><a href="#about">About</a></li>
-            </ul>
+        <nav>
+            <a href="#home">Home</a>
+            <a href="#skills">Browse Skills</a>
+            <a href="#offer">Offer Skills</a>
+            <a href="#about">About</a>
         </nav>
     </header>
 
     <main>
-        <section class="hero" id="home">
+        <section id="home" class="hero">
             <h2>Learn Together. Grow Together.</h2>
-            <p>
-                Connect with students to share skills, exchange knowledge,
-                and learn something new.
-            </p>
+            <p>Connect with students, share what you know, and learn something new.</p>
+            <a href="#skills">Browse Skills</a>
         </section>
 
-        <section class="skill-offerings" id="skills">
-            <h2>Explore Skills</h2>
-            <p class="section-intro">
-                Skill offerings from the Skill Swap database will appear here.
-            </p>
-
-            <!-- Skills will load from the backend API -->
-            <div id="skills-container" class="skill-grid">
-                <p>Loading skills...</p>
-            </div>
-        </section>
-
-        <section class="info-section" id="offer">
-            <h2>Offer Your Skills</h2>
-            <p>
-                Do you have skills you'd like to share?
-                Help another student learn something new.
-            </p>
-
-            <!-- New Skill Creation Form -->
-            <form id="skill-form" class="calculator-form">
-
-                <label for="title">Skill Title</label>
-                <input
-                    type="text"
-                    id="title"
-                    name="title"
-                    placeholder="Enter skill title"
-                    required
-                />
-
-                <label for="category">Category</label>
-                <input
-                    type="text"
-                    id="category"
-                    name="category"
-                    placeholder="Example: Computer Science"
-                    required
-                />
-
-                <label for="price">Price per Session ($)</label>
-                <input
-                    type="number"
-                    id="price"
-                    name="price"
-                    min="0"
-                    step="0.01"
-                    placeholder="Enter price"
-                    required
-                />
-
-                <label for="description">Description</label>
-                <textarea
-                    id="description"
-                    name="description"
-                    placeholder="Describe the skill you are offering"
-                    required
-                ></textarea>
-
-                <button type="submit">
-                    Add Skill
-                </button>
-
-            </form>
-        </section>
-
-        <section class="info-section" id="about">
-            <h2>About Skill Swap</h2>
-            <p>
-                Skill Swap helps college students and recent graduates
-                share knowledge, learn from one another, and build new skills.
-            </p>
-        </section>
-
-        <section class="skills-section">
+        <section id="skills" class="skills-section">
             <h2>Explore Skills</h2>
             <p>Find a skill to learn from another student.</p>
 
             <div class="filter-buttons">
-                <button class="filter-btn active" data-category="All">
-                    All
-                </button>
-                <button class="filter-btn" data-category="Computer Science">
-                    Computer Science
-                </button>
-                <button class="filter-btn" data-category="Math">
-                    Math
-                </button>
-                <button class="filter-btn" data-category="Internship">
-                    Internship
-                </button>
-                <button class="filter-btn" data-category="Career">
-                    Career
-                </button>
+                <button class="filter-btn active" data-category="All" type="button">All</button>
+                <button class="filter-btn" data-category="Computer Science" type="button">Computer Science</button>
+                <button class="filter-btn" data-category="Math" type="button">Math</button>
+                <button class="filter-btn" data-category="Internship" type="button">Internship</button>
+                <button class="filter-btn" data-category="Career" type="button">Career</button>
             </div>
 
-            <!-- Filtered database skills will appear here -->
-            <div id="filtered-skills-container" class="skills-container"></div>
+            <div id="skills-container" class="skills-container">
+                <p>Loading skills...</p>
+            </div>
         </section>
 
-        <section class="calculator-section">
-            <h2>Skill Session Cost Calculator</h2>
-            <p>Calculate the total cost of a skill session.</p>
+        <section id="offer" class="info-section">
+            <h2>Offer Your Skills</h2>
+            <p>Share your knowledge and help another student learn something new.</p>
 
-            <div class="calculator-form">
-                <label for="hourly-rate">Hourly Rate ($)</label>
+            <form id="skill-form">
+                <label for="skill-title">Skill Title</label>
+                <input
+                    type="text"
+                    id="skill-title"
+                    placeholder="Example: Web Development"
+                    required
+                >
+
+                <label for="skill-description">Description</label>
+                <textarea
+                    id="skill-description"
+                    placeholder="Describe the skill you are offering."
+                    required
+                ></textarea>
+
+                <label for="skill-category">Category</label>
+                <select id="skill-category" required>
+                    <option value="">Select a category</option>
+                    <option value="Computer Science">Computer Science</option>
+                    <option value="Math">Math</option>
+                    <option value="Internship">Internship</option>
+                    <option value="Career">Career</option>
+                </select>
+
+                <label for="skill-price">Price ($)</label>
                 <input
                     type="number"
-                    id="hourly-rate"
+                    id="skill-price"
                     min="0"
                     step="0.01"
-                    placeholder="Enter hourly rate"
-                />
+                    placeholder="Enter your price"
+                    required
+                >
 
-                <label for="hours">Number of Hours</label>
+                <label for="skill-provider">Your Name</label>
                 <input
-                    type="number"
-                    id="hours"
-                    min="0"
-                    step="0.5"
-                    placeholder="Enter hours"
-                />
+                    type="text"
+                    id="skill-provider"
+                    placeholder="Enter your name"
+                    required
+                >
 
-                <button type="button" id="calculate-button">
-                    Calculate Total
-                </button>
-
-                <p id="cost-result" aria-live="polite">
-                    Your total cost will appear here.
-                </p>
-            </div>
+                <button type="submit">Add Skill</button>
+                <p id="form-message" aria-live="polite"></p>
+            </form>
         </section>
 
-        <section id="find-match">
+        <section id="calculator" class="info-section">
+            <h2>Calculate Skill Costs</h2>
+            <p>Estimate the total cost based on an hourly rate and number of hours.</p>
+
+            <label for="hourly-rate">Hourly Rate ($)</label>
+            <input
+                type="number"
+                id="hourly-rate"
+                min="0"
+                step="0.01"
+                placeholder="Enter hourly rate"
+            >
+
+            <label for="hours">Number of Hours</label>
+            <input
+                type="number"
+                id="hours"
+                min="0"
+                step="0.01"
+                placeholder="Enter hours"
+            >
+
+            <button type="button" id="calculate-button">Calculate Total</button>
+            <p id="cost-result" aria-live="polite"></p>
+        </section>
+
+        <section id="matching" class="info-section">
             <h2>Find My Match</h2>
+            <p>Find skills that match your interests and budget.</p>
 
-            <label for="match-category">Preferred Category:</label>
-
+            <label for="match-category">Choose a Category</label>
             <select id="match-category">
                 <option value="Computer Science">Computer Science</option>
                 <option value="Math">Math</option>
@@ -183,30 +133,33 @@ https://stackoverflow.com/a/69069716
                 <option value="Career">Career</option>
             </select>
 
-            <label for="match-max-price">Maximum Price ($):</label>
-
+            <label for="match-max-price">Maximum Price ($)</label>
             <input
                 type="number"
                 id="match-max-price"
                 min="0"
+                step="0.01"
                 value="35"
-            />
+            >
 
-            <button type="button" id="find-match-button">
-                Find My Match
-            </button>
-
-            <div id="match-results"></div>
+            <button type="button" id="find-match-button">Find Matches</button>
+            <div id="match-results" aria-live="polite"></div>
         </section>
 
+        <section id="about" class="info-section">
+            <h2>About Skill Swap</h2>
+            <p>
+                Skill Swap is a platform for college students and recent graduates
+                to share knowledge, exchange skills, and learn from one another.
+                Our goal is to make learning more accessible through student connections.
+            </p>
+        </section>
     </main>
 
-    <footer class="site-footer">
+    <footer>
         <p>&copy; 2026 Skill Swap. Built for students, by students.</p>
     </footer>
 
-    <!-- JavaScript Files -->
-    <script src="api-service.js"></script>
     <script src="skillswap-functions.js"></script>
     <script src="script.js"></script>
 

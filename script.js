@@ -1,9 +1,22 @@
+
 // Used AI to help with coding and testing.
+// Skill Swap frontend - connects to the Express backend API.
 
 console.log("Welcome to Skill Swap!");
 
-// Store skills loaded from the database
+// Backend API address for local development.
+const API_BASE_URL = "http://localhost:3000/api/skills";
+
+// Store skills retrieved from the database.
 let skills = [];
+let selectedCategory = "All";
+
+// HTML elements.
+const skillsContainer = document.getElementById("skills-container");
+const filterButtons = document.querySelectorAll(".filter-btn");
+
+const skillForm = document.getElementById("skill-form");
+const formMessage = document.getElementById("form-message");
 
 const rateInput = document.getElementById("hourly-rate");
 const hoursInput = document.getElementById("hours");
@@ -15,234 +28,229 @@ const categoryInput = document.getElementById("match-category");
 const maxPriceInput = document.getElementById("match-max-price");
 const matchResults = document.getElementById("match-results");
 
-const skillForm = document.getElementById("skill-form");
-const skillsContainer = document.getElementById("skills-container");
-
-// Display skills loaded from the database
-function displaySkills(skillList) {
-  if (!skillsContainer) {
-    console.error("Skills container not found.");
-    return;
-  }
-
-  if (skillList.length === 0) {
-    skillsContainer.innerHTML = "<p>No skills available.</p>";
-    return;
-  }
-
-  skillsContainer.innerHTML = skillList
-    .map(
-      (skill) => `
-        <article class="skill-card">
-          <h3>${escapeHTML(skill.title)}</h3>
-          <p>Category: ${escapeHTML(skill.category)}</p>
-          <p>Price: $${Number(skill.price).toFixed(2)}</p>
-          <p>${escapeHTML(skill.description || "")}</p>
-
-          <button
-            class="details-button"
-            type="button"
-            data-details="${escapeHTML(skill.description || "No additional details available.")}"
-            aria-expanded="false"
-          >
-            View Details
-          </button>
-
-          <p class="skill-details" hidden></p>
-        </article>
-      `
-    )
-    .join("");
-}
-
-// Escape HTML to safely display user-entered information
+// Escape user-provided text before displaying it as HTML.
 function escapeHTML(value) {
-  return String(value ?? "").replace(/[&<>"']/g, (character) => {
-    const entities = {
-      "&": "&amp;",
-      "<": "&lt;",
-      ">": "&gt;",
-      '"': "&quot;",
-      "'": "&#39;"
-    };
-
-    return entities[character];
-  });
+    return String(value ?? "").replace(/[&<>"']/g, character => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+    })[character]);
 }
 
-// Fetch skills from the backend database
-async function loadSkills() {
-  try {
-    const data = await window.apiService.fetchSkills();
+// GET: Retrieve skills from the backend database.
+async function fetchSkills() {
+    try {
+        skillsContainer.innerHTML = "<p>Loading skills...</p>";
 
-    skills = data;
+        const response = await fetch(API_BASE_URL);
 
-    displaySkills(skills);
+        if (!response.ok) {
+            throw new Error("Unable to retrieve skills.");
+        }
 
-    console.log("Skills loaded successfully:", skills);
+        skills = await response.json();
 
-    return data;
+        if (!Array.isArray(skills)) {
+            throw new Error("The API returned an unexpected response.");
+        }
 
-  } catch (error) {
-    console.error("Error loading skills:", error);
+        displaySkills();
 
-    if (skillsContainer) {
-      skillsContainer.innerHTML =
-        "<p>Unable to load skills. Please try again.</p>";
+        console.log("Skills loaded successfully:", skills);
+
+    } catch (error) {
+        console.error("Error loading skills:", error);
+
+        skillsContainer.innerHTML =
+            "<p>Unable to load skills. Please check that the backend is running.</p>";
+    }
+}
+
+// Display skills retrieved from the database.
+function displaySkills() {
+    const filteredSkills = selectedCategory === "All"
+        ? skills
+        : skills.filter(skill => skill.category === selectedCategory);
+
+    if (filteredSkills.length === 0) {
+        skillsContainer.innerHTML = "<p>No skills found in this category.</p>";
+        return;
     }
 
-    return [];
-  }
+    skillsContainer.innerHTML = filteredSkills.map(skill => `
+        <article class="skill-card">
+            <h3>${escapeHTML(skill.title)}</h3>
+            <p>Category: ${escapeHTML(skill.category)}</p>
+            <p>Price: $${Number(skill.price).toFixed(2)}</p>
+            <p>Provider: ${escapeHTML(skill.provider || "Anonymous")}</p>
+
+            <button
+                class="details-button"
+                type="button"
+                aria-expanded="false"
+            >
+                View Details
+            </button>
+
+            <p class="skill-details" hidden>
+                ${escapeHTML(skill.description || "")}
+            </p>
+        </article>
+    `).join("");
 }
 
-// Skill card detail buttons
-if (skillsContainer) {
-  skillsContainer.addEventListener("click", (event) => {
+// Category filtering.
+filterButtons.forEach(button => {
+    button.addEventListener("click", () => {
+        selectedCategory = button.dataset.category;
+
+        filterButtons.forEach(filterButton => {
+            filterButton.classList.remove("active");
+        });
+
+        button.classList.add("active");
+        displaySkills();
+    });
+});
+
+// Show and hide skill details.
+skillsContainer.addEventListener("click", event => {
     const button = event.target.closest(".details-button");
 
     if (!button) {
-      return;
+        return;
     }
 
     const card = button.closest(".skill-card");
     const details = card.querySelector(".skill-details");
-
     const isHidden = details.hidden;
 
-    if (isHidden) {
-      details.textContent = button.dataset.details;
-      details.hidden = false;
+    details.hidden = !isHidden;
 
-      button.textContent = "Hide Details";
-      button.setAttribute("aria-expanded", "true");
+    button.textContent = isHidden ? "Hide Details" : "View Details";
+    button.setAttribute("aria-expanded", String(isHidden));
+});
 
-    } else {
-      details.hidden = true;
-      details.textContent = "";
-
-      button.textContent = "View Details";
-      button.setAttribute("aria-expanded", "false");
-    }
-  });
-}
-
-// Cost calculator
-// Fixed it up
-if (calculateButton && rateInput && hoursInput && costResult) {
-  calculateButton.addEventListener("click", () => {
-    const hourlyRate = Number(rateInput.value);
-    const hours = Number(hoursInput.value);
-
-    if (
-      rateInput.value.trim() === "" ||
-      hoursInput.value.trim() === "" ||
-      !Number.isFinite(hourlyRate) ||
-      !Number.isFinite(hours) ||
-      hourlyRate < 0 ||
-      hours < 0
-    ) {
-      costResult.textContent =
-        "Please enter a valid, non-negative rate and number of hours.";
-
-      return;
-    }
-
-    const total = calculateTotalCosts(hourlyRate, hours);
-
-    costResult.textContent = `Total cost: $${total.toFixed(2)}`;
-  });
-}
-
-// Find My Match
-if (findMatchButton && categoryInput && maxPriceInput && matchResults) {
-  findMatchButton.addEventListener("click", () => {
-    const category = categoryInput.value;
-    const maxPrice = Number(maxPriceInput.value);
-
-    if (
-      maxPriceInput.value.trim() === "" ||
-      !Number.isFinite(maxPrice) ||
-      maxPrice < 0
-    ) {
-      matchResults.textContent =
-        "Please enter a valid, non-negative maximum price.";
-
-      return;
-    }
-
-    const userNeeds = {
-      category,
-      maxPrice
-    };
-
-    // Match skills loaded from the database
-    const matches = matchSkillsToUser(userNeeds, skills);
-
-    if (matches.length === 0) {
-      matchResults.textContent = "No matching skills found.";
-      return;
-    }
-
-    matchResults.innerHTML = matches
-      .map(
-        (skill) => `
-          <article class="skill-card">
-            <h3>${escapeHTML(skill.title)}</h3>
-            <p>Category: ${escapeHTML(skill.category)}</p>
-            <p>Price: $${Number(skill.price).toFixed(2)}</p>
-            <p>${escapeHTML(skill.description || "")}</p>
-          </article>
-        `
-      )
-      .join("");
-  });
-}
-
-// Add a new skill to the database
-if (skillForm) {
-  skillForm.addEventListener("submit", async (event) => {
+// POST: Add a new skill to the backend database.
+skillForm.addEventListener("submit", async event => {
     event.preventDefault();
 
-    const skillData = {
-      title: document.getElementById("title").value.trim(),
-      category: document.getElementById("category").value.trim(),
-      price: Number(document.getElementById("price").value),
-      description: document.getElementById("description").value.trim()
+    const newSkill = {
+        title: document.getElementById("skill-title").value.trim(),
+        description: document.getElementById("skill-description").value.trim(),
+        category: document.getElementById("skill-category").value,
+        price: Number(document.getElementById("skill-price").value),
+        provider: document.getElementById("skill-provider").value.trim()
     };
 
     if (
-      !skillData.title ||
-      !skillData.category ||
-      !skillData.description ||
-      document.getElementById("price").value.trim() === "" ||
-      !Number.isFinite(skillData.price) ||
-      skillData.price < 0
+        !newSkill.title ||
+        !newSkill.description ||
+        !newSkill.category ||
+        !newSkill.provider ||
+        document.getElementById("skill-price").value.trim() === "" ||
+        !Number.isFinite(newSkill.price) ||
+        newSkill.price < 0
     ) {
-      alert("Please enter valid information for all fields.");
-      return;
+        formMessage.textContent =
+            "Please complete all fields with valid information.";
+        return;
     }
 
     try {
-      // Save the new skill using the API
-      await window.apiService.createSkill(skillData);
+        formMessage.textContent = "Saving your skill...";
 
-      // Reload skills from the database
-      await loadSkills();
+        const response = await fetch(API_BASE_URL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(newSkill)
+        });
 
-      // Clear the form
-      skillForm.reset();
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || "Failed to save skill.");
+        }
 
-      alert("Skill added successfully!");
+        await response.json();
+
+        formMessage.textContent = "Your skill was successfully added!";
+        skillForm.reset();
+
+        // Reload skills from the database.
+        await fetchSkills();
 
     } catch (error) {
-      console.error("Error creating skill:", error);
+        console.error("Error adding skill:", error);
 
-      alert("Could not add skill. Please try again.");
+        formMessage.textContent =
+            "Unable to save your skill. Please check your backend connection.";
     }
-  });
+});
+
+// Cost calculator.
+if (calculateButton && rateInput && hoursInput && costResult) {
+    calculateButton.addEventListener("click", () => {
+        const hourlyRate = Number(rateInput.value);
+        const hours = Number(hoursInput.value);
+
+        if (
+            rateInput.value.trim() === "" ||
+            hoursInput.value.trim() === "" ||
+            !Number.isFinite(hourlyRate) ||
+            !Number.isFinite(hours) ||
+            hourlyRate < 0 ||
+            hours < 0
+        ) {
+            costResult.textContent =
+                "Please enter a valid, non-negative rate and number of hours.";
+            return;
+        }
+
+        const total = calculateTotalCosts(hourlyRate, hours);
+
+        costResult.textContent = `Total cost: $${total.toFixed(2)}`;
+    });
 }
 
-// Load database skills when the page opens
-document.addEventListener("DOMContentLoaded", async () => {
-  await loadSkills();
-});
+// Find My Match.
+if (findMatchButton && categoryInput && maxPriceInput && matchResults) {
+    findMatchButton.addEventListener("click", () => {
+        const category = categoryInput.value;
+        const maxPrice = Number(maxPriceInput.value);
+
+        if (
+            maxPriceInput.value.trim() === "" ||
+            !Number.isFinite(maxPrice) ||
+            maxPrice < 0
+        ) {
+            matchResults.textContent =
+                "Please enter a valid, non-negative maximum price.";
+            return;
+        }
+
+        const userNeeds = { category, maxPrice };
+        const matches = matchSkillsToUser(userNeeds, skills);
+
+        if (matches.length === 0) {
+            matchResults.textContent = "No matching skills found.";
+            return;
+        }
+
+        matchResults.innerHTML = matches.map(skill => `
+            <article class="skill-card">
+                <h3>${escapeHTML(skill.title)}</h3>
+                <p>Category: ${escapeHTML(skill.category)}</p>
+                <p>Price: $${Number(skill.price).toFixed(2)}</p>
+                <p>Provider: ${escapeHTML(skill.provider || "Anonymous")}</p>
+                <p>${escapeHTML(skill.description || "")}</p>
+            </article>
+        `).join("");
+    });
+}
+
+// Load skills when the page opens.
+fetchSkills();
